@@ -49,19 +49,7 @@ void hash_chain_add(element item, struct list* ht[]) {
 }
 
 // 체인법을 이용하여 테이블에 저장된 키를 탐색
-void hash_chain_search(element item, struct list* ht[]) {
-	struct list* node;
-	int hash_value = hash_function(item.key);
-	for (node = ht[hash_value]; node; node = node->link) {
-		if (node->item.key == item.key) {
-			fprintf(stderr, "탐색 %d 성공\n", item.key);
-			return;
-		}
-	}
-	printf("키를 찾지 못했음\n");
-}
-
-void hash_chain_print(int key) {
+void hash_chain_search(int key) {
 	struct list* node;
 	int hash_value = hash_function(key);
 	printf("\n=======================================\n");
@@ -103,7 +91,7 @@ void csv_data_add() {
 		sub = strtok(NULL, ",");
 		if (sub == NULL) {
 			items.key = 0;
-			printf("데이터 없음\n");
+			//printf("데이터 없음\n");
 			return 0;
 		}
 		strcpy(items.name, sub);
@@ -131,7 +119,7 @@ int main() {
 		if (choice == 1) {
 			printf("학번 입력 => ");
 			scanf_s("%d", &student_num);
-			hash_chain_print(student_num);
+			hash_chain_search(student_num);
 		}
 		else if (choice == 2)
 			break;
@@ -139,6 +127,5 @@ int main() {
 			printf("다시 입력하십시오\n");
 	}
 
-	printf("\n\n");
 	return 0;
 }
