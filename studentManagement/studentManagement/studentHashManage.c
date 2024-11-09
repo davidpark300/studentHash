@@ -6,12 +6,14 @@
 #define TABLE_SIZE 2599999
 #define NAME_SIZE 100
 #define DATA_SIZE 256
-#define DATA_TYPES 5
+#define LATE_SIZE 10
+int data_numbers = 0;
 
 typedef struct {
 	int key;
 	char name[NAME_SIZE];
 	int phone_number;
+	char late[LATE_SIZE];
 } element;
 
 struct list {
@@ -37,9 +39,11 @@ void hash_chain_add(element item, struct list* ht[]) {
 		}
 	}
 	ptr = (struct list*)malloc(sizeof(struct list));
-	ptr->item.phone_number = item.phone_number;
 	ptr->item.key = item.key;
 	strcpy(ptr->item.name, item.name);
+	ptr->item.phone_number = item.phone_number;
+	strcpy(ptr->item.late, item.late);
+
 	ptr->link = NULL;
 
 	if (node_before)
@@ -64,57 +68,78 @@ void hash_chain_search(int key) {
 	printf("=======================================\n");
 }
 
-void csv_data_add() {
-	FILE* fp;
+void csv_data_write(int key) {
+	FILE* fpw = NULL;
+	if ((fpw = fopen("studentData.csv", "w")) == NULL) {
+		printf("파일 생성 오류\n");
+		fclose(fpw);
+		return;
+	}
+	char lateYes = 'T';
+	char lateNo = 'F';
+	struct list* node;
+	int hash_value = hash_function(key);
+	for (node = hash_table[hash_value]; node; node = node->link) {
+		fprintf(fpw, "%d, %s, 0%d, %c", node->item.key, node->item.name, node->item.phone_number, lateYes);
+	}
+	fclose(fpw);
+}
+
+// csv 파일 읽어와서 해시에 등록할 수 있도록 값 저장하는 함수
+void csv_data_read() {
+	FILE* fpr;
 	char str[DATA_SIZE];
 	element items;
 
-	if ((fp = fopen("studentData.csv", "r")) == NULL) {
-		printf("파일이 존재하지 않습니다.\n");
-		items.key = 0;
-		strcpy(items.name, "INVALID");
-		items.phone_number = 0;
-		fclose(fp);
-		return 0;
+	if ((fpr = fopen("studentData.csv", "r+")) == NULL) {
+		printf("파일 읽기 오류\n");
+		fclose(fpr);
+		return;
 	}
 
-	fgets(str, DATA_SIZE, fp);	// 파일에서 문자열을 가져오는 함수
+	fgets(str, DATA_SIZE, fpr);	// 파일에서 문자열을 가져오는 함수
 
 	char* sub = strtok(str, ",");
 
-	while(1) {
-		fgets(str, DATA_SIZE, fp);
+	while (1) {
+		fgets(str, DATA_SIZE, fpr);
 		sub = strtok(str, ",");
-		items.key = atoi(sub);
+		items.key = atoi(sub);	// csv 파일의 학번 저장
 		//printf("%d || ", atoi(sub));
 
 		sub = strtok(NULL, ",");
 		if (sub == NULL) {
 			items.key = 0;
 			//printf("데이터 없음\n");
-			return 0;
+			return;
 		}
-		strcpy(items.name, sub);
+		strcpy(items.name, sub);	// csv 파일의 이름 저장
 		//printf("%s || ", sub);
 
 		sub = strtok(NULL, ",");
-		items.phone_number = atoi(sub);
+		items.phone_number = atoi(sub);	// csv 파일의 핸드폰 번호 저장
 		//printf("%d || ", atoi(sub));
 		//printf("\n");
 
-		hash_chain_add(items, hash_table);
+		sub = strtok(NULL, ",");
+		strcpy(items.late, sub);
 
+		data_numbers++;
+		hash_chain_add(items, hash_table);
 	}
+	fclose(fpr);
 }
+
+
 
 int main() {
 	int choice;
 	int student_num;
 
-	csv_data_add();
+	csv_data_read();
 
 	while (1) {
-		printf("선택지 : 1. 학생조회 2. 종료 => ");
+		printf("선택지 : 1. 학생조회 2. 종료 3. (미완성)파일 업데이트=> ");
 		scanf_s("%d", &choice);
 		if (choice == 1) {
 			printf("학번 입력 => ");
@@ -123,8 +148,13 @@ int main() {
 		}
 		else if (choice == 2)
 			break;
+		else if (choice == 3) {
+			printf("학번 입력 => ");
+			scanf_s("%d", &student_num);
+			csv_data_write(student_num);
+		}
 		else
-			printf("다시 입력하십시오\n");
+			printf("다시 입력하십시오\n\n");
 	}
 
 	return 0;
