@@ -138,6 +138,7 @@ int main() {
 		else
 			printf("다시 입력하십시오\n");
 	}
+
 	printf("\n\n");
 	return 0;
 }
