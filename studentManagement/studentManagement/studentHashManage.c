@@ -139,7 +139,7 @@ int main() {
 	csv_data_read();
 
 	while (1) {
-		printf("선택지 : 1. 학생조회 2. 종료 3. (미완성)파일 업데이트=> ");
+		printf("선택지 : 1. 학생조회 2. 종료 3. (미완성기능)파일 업데이트=> ");
 		scanf_s("%d", &choice);
 		if (choice == 1) {
 			printf("학번 입력 => ");
